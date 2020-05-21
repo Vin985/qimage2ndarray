@@ -35,7 +35,9 @@ but are required in PyQt and PySide), one may e.g. write
 `getprop(widget.width)`.
 """
 
-import sys, os
+import sys
+import os
+
 
 def getprop_PythonQt(prop):
     """getprop(property_or_getter)
@@ -45,6 +47,7 @@ def getprop_PythonQt(prop):
     argument, which is assumed to be (the value of) a python property
     through which PythonQt exposes Qt properties."""
     return prop
+
 
 def getprop_other(getter):
     """getprop(property_or_getter)
@@ -56,10 +59,11 @@ def getprop_other(getter):
     and no calling must be done.)"""
     return getter()
 
+
 class QtDriver(object):
     DRIVERS = ('PyQt5', 'PyQt4', 'PySide', 'PySide2', 'PythonQt')
-    DEFAULT = 'PyQt5'
-    
+    DEFAULT = 'PySide2'
+
     @classmethod
     def detect_qt(cls):
         for drv in cls.DRIVERS:
@@ -75,7 +79,7 @@ class QtDriver(object):
     def getprop(self):
         return getprop_PythonQt if self._drv == 'PythonQt' else getprop_other
 
-    def __init__(self, drv = os.environ.get('QT_DRIVER')):
+    def __init__(self, drv=os.environ.get('QT_DRIVER')):
         """Supports QT_API (used by ETS and ipython)"""
         if drv is None:
             drv = self.detect_qt()
@@ -84,7 +88,7 @@ class QtDriver(object):
         if drv is None:
             drv = self.DEFAULT
         drv = {'pyside': 'PySide', 'pyside2': 'PySide2',
-               'pyqt'  : 'PyQt4',  'pyqt5'  : 'PyQt5'}.get(drv, drv) # map ETS syntax
+               'pyqt': 'PyQt4',  'pyqt5': 'PyQt5'}.get(drv, drv)  # map ETS syntax
         assert drv in self.DRIVERS
         self._drv = drv
 
@@ -112,8 +116,9 @@ class QtDriver(object):
             import sip
             for api in ('QVariant', 'QString'):
                 if sip.getapi(api) != 2:
-                    raise RuntimeError('%s API already set to V%d, but should be 2' % (api, sip.getapi(api)))
-            
+                    raise RuntimeError(
+                        '%s API already set to V%d, but should be 2' % (api, sip.getapi(api)))
+
     def importMod(self, mod):
         if self._drv == 'PyQt4':
             self._initPyQt4()
